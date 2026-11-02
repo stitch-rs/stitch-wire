@@ -16,3 +16,4 @@ bytes = "1.10"
 
 [dev-dependencies]
 tokio = { version = "1.43", features = ["full"] }
+futures-util = { version = "0.3", default-features = false, features = ["sink"] }
