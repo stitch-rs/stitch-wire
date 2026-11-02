@@ -1,0 +1,16 @@
+[package]
+name = "stitch-wire-adapter-c"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "C-ABI shared and static library bindings for Stitch Wire framing and CRC32"
+keywords = ["c-abi", "ffi", "cdylib", "stitch", "wire"]
+
+[lib]
+crate-type = ["cdylib", "staticlib", "rlib"]
+
+[dependencies]
+stitch-wire-core = { workspace = true }

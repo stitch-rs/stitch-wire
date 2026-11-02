@@ -1,0 +1,13 @@
+[package]
+name = "stitch-wire-adapter-wasm"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "WebAssembly (WASM) browser runtime adapter for zero-copy Stitch Wire inspection"
+keywords = ["wasm", "webassembly", "browser", "stitch", "wire"]
+
+[dependencies]
+stitch-wire-core = { workspace = true }

@@ -5,6 +5,8 @@ members = [
     "crates/stitch-wire",
     "adapters/stitch-wire-adapter-tokio",
     "adapters/stitch-wire-adapter-std",
+    "adapters/stitch-wire-adapter-c",
+    "adapters/stitch-wire-adapter-wasm",
     "benches",
 ]
 
