@@ -4,11 +4,14 @@
 
 pub use stitch_wire_core;
 pub use stitch_wire_core::{
-    FrameReader, FrameView, OptimizationProfile, ResyncStats, StreamResyncParser, VectoredFrame,
-    WIRE_MAGIC, WIRE_VERSION_1, WireError, WireFlags, WireHeader, checked_frame_total_len, crc,
-    error, find_magic, find_magic_swar, frame, pack_frame, pack_frame_vectored, resync,
-    resync_frame, simd, unpack_frame, varint,
+    CachePaddedAtomicUsize, FrameReader, FrameView, OptimizationProfile, ResyncStats, SpscByteRing,
+    StreamResyncParser, VectoredFrame, WIRE_MAGIC, WIRE_VERSION_1, WireError, WireFlags,
+    WireHeader, checked_frame_total_len, crc, error, find_magic, find_magic_swar, frame,
+    pack_frame, pack_frame_vectored, resync, resync_frame, ring, simd, unpack_frame, varint,
 };
+
+#[cfg(feature = "std")]
+pub mod udp;
 
 #[cfg(feature = "data")]
 pub mod data_adapter {
@@ -99,7 +102,11 @@ pub mod prelude {
     pub use stitch_wire_core::resync::{
         ResyncStats, StreamResyncParser, find_magic, find_magic_swar, resync_frame,
     };
+    pub use stitch_wire_core::ring::{CachePaddedAtomicUsize, SpscByteRing};
     pub use stitch_wire_core::varint::{decode_prefix_varint, encode_prefix_varint};
+
+    #[cfg(feature = "std")]
+    pub use crate::udp::{UdpBatchReceiver, UdpBatchSender};
 
     #[cfg(feature = "data")]
     pub use crate::data_adapter::{pack_record, unpack_record};
