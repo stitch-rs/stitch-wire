@@ -9,6 +9,7 @@ pub mod crc;
 pub mod error;
 pub mod frame;
 pub mod resync;
+pub mod ring;
 pub mod simd;
 pub mod varint;
 
@@ -22,4 +23,5 @@ pub use frame::{
     WireFlags, WireHeader, checked_frame_total_len, pack_frame, pack_frame_vectored, unpack_frame,
 };
 pub use resync::{ResyncStats, StreamResyncParser, find_magic, find_magic_swar, resync_frame};
+pub use ring::{CachePaddedAtomicUsize, SpscByteRing};
 pub use varint::{decode_prefix_varint, encode_prefix_varint};
