@@ -16,7 +16,7 @@ pub mod data_adapter {
         OptimizationProfile as WireProfile, WireError, WireFlags, WireHeader, pack_frame,
         unpack_frame,
     };
-    use stitch_data::prelude::{OptimizationProfile as DataProfile, StitchRecord};
+    use stitch_data::prelude::{OptimizationProfile as DataProfile, Record};
 
     #[inline]
     fn to_data_profile(p: WireProfile) -> DataProfile {
@@ -39,8 +39,8 @@ pub mod data_adapter {
         }
     }
 
-    /// Packs a `StitchRecord` directly into a wire frame with schema fingerprint validation.
-    pub fn pack_record<T: StitchRecord>(
+    /// Packs a `Record` directly into a wire frame with schema fingerprint validation.
+    pub fn pack_record<T: Record>(
         record: &T,
         profile: WireProfile,
         scratch: &mut [u8],
@@ -63,8 +63,8 @@ pub mod data_adapter {
         pack_frame(&header, &scratch[..payload_len], dst)
     }
 
-    /// Unpacks a `StitchRecord` from a wire frame, validating CRC32 and schema hash.
-    pub fn unpack_record<T: StitchRecord>(src: &[u8]) -> Result<T, WireError> {
+    /// Unpacks a `Record` from a wire frame, validating CRC32 and schema hash.
+    pub fn unpack_record<T: Record>(src: &[u8]) -> Result<T, WireError> {
         let (header, payload) = unpack_frame(src)?;
         if header.flags.has_schema_hash
             && let Some(actual) = header.schema_hash

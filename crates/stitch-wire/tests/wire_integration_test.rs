@@ -1,7 +1,7 @@
 use stitch_data::prelude::*;
 use stitch_wire::prelude::*;
 
-#[derive(Debug, PartialEq, StitchRecord)]
+#[derive(Debug, PartialEq, Record)]
 struct Packet {
     id: u32,
     #[stitch(zigzag)]

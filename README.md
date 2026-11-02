@@ -36,7 +36,7 @@ structures (`stitch-data`).
 - **`crates/stitch-wire-core`**: Pure `#![no_std]` framing invariants, hardware CRC32,
   resync parser, and varint primitives.
 - **`crates/stitch-wire`**: Ergonomic facade and adapter integrations with
-  `stitch-data::StitchRecord`.
+  `stitch-data::Record`.
 - **`benches`**: Criterion microbenchmarks evaluating throughput and recovery times.
 
 ---
