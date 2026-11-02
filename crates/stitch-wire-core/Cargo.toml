@@ -1,0 +1,17 @@
+[package]
+name = "stitch-wire-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "Core #![no_std] framing, streaming resynchronization parser, and hardware Castagnoli CRC32 for the Stitch Wire Bus"
+
+[dependencies]
+zerocopy = { workspace = true, optional = true }
+
+[features]
+default = ["std"]
+std = ["alloc"]
+alloc = []
+zero-copy = ["dep:zerocopy"]

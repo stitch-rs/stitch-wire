@@ -1,0 +1,19 @@
+[package]
+name = "stitch-wire"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "High-performance microsecond transport bus and wire protocol facade for the Stitch ecosystem"
+
+[dependencies]
+stitch-wire-core = { workspace = true }
+stitch-data = { workspace = true, optional = true }
+
+[features]
+default = ["std", "data"]
+std = ["stitch-wire-core/std"]
+alloc = ["stitch-wire-core/alloc"]
+zero-copy = ["stitch-wire-core/zero-copy"]
+data = ["dep:stitch-data"]

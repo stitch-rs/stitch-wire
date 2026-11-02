@@ -1,0 +1,16 @@
+[package]
+name = "stitch-wire-benches"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+stitch-wire = { workspace = true, features = ["std", "data"] }
+criterion = { workspace = true }
+
+[lib]
+name = "stitch_wire_benches"
+path = "src/lib.rs"
