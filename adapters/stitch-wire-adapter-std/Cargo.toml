@@ -1,0 +1,13 @@
+[package]
+name = "stitch-wire-adapter-std"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "Standard library synchronous Read/Write stream framing adapter for the Stitch Wire protocol"
+keywords = ["stitch", "std", "sync", "framing", "stream"]
+
+[dependencies]
+stitch-wire-core = { workspace = true }

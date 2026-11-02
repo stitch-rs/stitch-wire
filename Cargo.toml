@@ -3,6 +3,8 @@ resolver = "2"
 members = [
     "crates/stitch-wire-core",
     "crates/stitch-wire",
+    "adapters/stitch-wire-adapter-tokio",
+    "adapters/stitch-wire-adapter-std",
     "benches",
 ]
 

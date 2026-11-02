@@ -1,0 +1,18 @@
+[package]
+name = "stitch-wire-adapter-tokio"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "Tokio async transport framing adapter and codec for the Stitch Wire protocol"
+keywords = ["stitch", "tokio", "async", "framing", "codec"]
+
+[dependencies]
+stitch-wire-core = { workspace = true }
+tokio-util = { version = "0.7", default-features = false, features = ["codec"] }
+bytes = "1.10"
+
+[dev-dependencies]
+tokio = { version = "1.43", features = ["full"] }
