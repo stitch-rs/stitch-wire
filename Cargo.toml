@@ -17,7 +17,7 @@ repository = "https://github.com/stitch-rs/stitch-wire"
 [workspace.dependencies]
 stitch-wire-core = { path = "crates/stitch-wire-core", default-features = false }
 stitch-wire = { path = "crates/stitch-wire", default-features = false }
-stitch-data = { path = "../compact-binary-protocol/crates/stitch-data", default-features = false, features = ["std", "derive"] }
+stitch-data = { git = "https://github.com/stitch-rs/stitch-data.git", branch = "dev", default-features = false, features = ["std", "derive"] }
 
 zerocopy = { version = "0.8", default-features = false, features = ["derive"] }
 crc32fast = { version = "1.4", default-features = false }
