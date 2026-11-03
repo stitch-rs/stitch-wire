@@ -68,11 +68,7 @@ pub unsafe extern "C" fn stitch_pack_frame(
         let (profile, flags, schema_hash) = if opts.is_null() {
             (
                 OptimizationProfile::Balanced,
-                WireFlags {
-                    is_compressed: false,
-                    is_chunked: false,
-                    has_schema_hash: false,
-                },
+                WireFlags::new(false, false, false),
                 None,
             )
         } else {
@@ -84,11 +80,11 @@ pub unsafe extern "C" fn stitch_pack_frame(
                 3 => OptimizationProfile::MaxDensity,
                 _ => OptimizationProfile::Balanced,
             };
-            let f = WireFlags {
-                is_compressed: (opt.flags & 0x01) != 0,
-                is_chunked: (opt.flags & 0x02) != 0,
-                has_schema_hash: opt.schema_hash != 0,
-            };
+            let f = WireFlags::new(
+                (opt.flags & 0x01) != 0,
+                (opt.flags & 0x02) != 0,
+                opt.schema_hash != 0,
+            );
             let sh = if opt.schema_hash != 0 {
                 Some(opt.schema_hash)
             } else {

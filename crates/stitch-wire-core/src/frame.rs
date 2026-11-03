@@ -69,7 +69,7 @@ impl OptimizationProfile {
     }
 }
 
-/// Bitwise frame attribute flags.
+/// Bitwise frame attribute flags adhering to the Scrooge Systems Mindset.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct WireFlags {
     /// Payload is compressed using profile transforms.
@@ -78,32 +78,84 @@ pub struct WireFlags {
     pub is_chunked: bool,
     /// Header includes a 64-bit schema fingerprint.
     pub has_schema_hash: bool,
+    /// State channel marker: retain last valid state for subsequent consumers.
+    pub retain_last: bool,
+    /// High-priority frame: bypasses low-priority queues in ring buffers.
+    pub high_priority: bool,
+    /// Transport requires reliable delivery acknowledgment.
+    pub requires_ack: bool,
+    /// Frame is a system heartbeat/ping datagram.
+    pub is_heartbeat: bool,
 }
 
 impl WireFlags {
-    /// Converts flags into a 4-bit representation.
+    /// Creates a new WireFlags with baseline parameters.
+    #[inline]
+    pub const fn new(is_compressed: bool, is_chunked: bool, has_schema_hash: bool) -> Self {
+        Self {
+            is_compressed,
+            is_chunked,
+            has_schema_hash,
+            retain_last: false,
+            high_priority: false,
+            requires_ack: false,
+            is_heartbeat: false,
+        }
+    }
+    /// Bit 0: Payload is compressed.
+    pub const FLAG_COMPRESSED: u8 = 0x01;
+    /// Bit 1: Payload is chunked/fragmented.
+    pub const FLAG_CHUNKED: u8 = 0x02;
+    /// Bit 2: Includes schema fingerprint.
+    pub const FLAG_SCHEMA_HASH: u8 = 0x04;
+    /// Bit 3: Retain last state snapshot.
+    pub const FLAG_RETAIN_LAST: u8 = 0x08;
+    /// Bit 4: High priority frame.
+    pub const FLAG_HIGH_PRIORITY: u8 = 0x10;
+    /// Bit 5: Requires delivery ACK.
+    pub const FLAG_REQUIRES_ACK: u8 = 0x20;
+    /// Bit 6: Heartbeat packet.
+    pub const FLAG_HEARTBEAT: u8 = 0x40;
+
+    /// Converts flags into an 8-bit byte representation.
     #[inline]
     pub const fn to_bits(&self) -> u8 {
         let mut bits = 0u8;
         if self.is_compressed {
-            bits |= 0x1;
+            bits |= Self::FLAG_COMPRESSED;
         }
         if self.is_chunked {
-            bits |= 0x2;
+            bits |= Self::FLAG_CHUNKED;
         }
         if self.has_schema_hash {
-            bits |= 0x4;
+            bits |= Self::FLAG_SCHEMA_HASH;
+        }
+        if self.retain_last {
+            bits |= Self::FLAG_RETAIN_LAST;
+        }
+        if self.high_priority {
+            bits |= Self::FLAG_HIGH_PRIORITY;
+        }
+        if self.requires_ack {
+            bits |= Self::FLAG_REQUIRES_ACK;
+        }
+        if self.is_heartbeat {
+            bits |= Self::FLAG_HEARTBEAT;
         }
         bits
     }
 
-    /// Parses flags from a 4-bit representation.
+    /// Parses flags from an 8-bit byte representation.
     #[inline]
     pub const fn from_bits(bits: u8) -> Self {
         Self {
-            is_compressed: (bits & 0x1) != 0,
-            is_chunked: (bits & 0x2) != 0,
-            has_schema_hash: (bits & 0x4) != 0,
+            is_compressed: (bits & Self::FLAG_COMPRESSED) != 0,
+            is_chunked: (bits & Self::FLAG_CHUNKED) != 0,
+            has_schema_hash: (bits & Self::FLAG_SCHEMA_HASH) != 0,
+            retain_last: (bits & Self::FLAG_RETAIN_LAST) != 0,
+            high_priority: (bits & Self::FLAG_HIGH_PRIORITY) != 0,
+            requires_ack: (bits & Self::FLAG_REQUIRES_ACK) != 0,
+            is_heartbeat: (bits & Self::FLAG_HEARTBEAT) != 0,
         }
     }
 }
@@ -543,11 +595,7 @@ mod tests {
         let payload = b"Hello CBP Engine from Rust!";
         let header = WireHeader {
             profile: OptimizationProfile::Balanced,
-            flags: WireFlags {
-                is_compressed: true,
-                is_chunked: false,
-                has_schema_hash: true,
-            },
+            flags: WireFlags::new(true, false, true),
             payload_len: payload.len(),
             schema_hash: Some(0xDEADBEEFCAFE1234),
         };
@@ -565,11 +613,7 @@ mod tests {
         let payload = b"Vectored scatter-gather payload";
         let header = WireHeader {
             profile: OptimizationProfile::Realtime,
-            flags: WireFlags {
-                is_compressed: true,
-                is_chunked: false,
-                has_schema_hash: true,
-            },
+            flags: WireFlags::new(true, false, true),
             payload_len: payload.len(),
             schema_hash: Some(0xA1B2C3D4E5F60718),
         };
@@ -605,21 +649,13 @@ mod tests {
         };
         let hdr2 = WireHeader {
             profile: OptimizationProfile::Realtime,
-            flags: WireFlags {
-                is_compressed: true,
-                is_chunked: false,
-                has_schema_hash: false,
-            },
+            flags: WireFlags::new(true, false, false),
             payload_len: payload2.len(),
             schema_hash: None,
         };
         let hdr3 = WireHeader {
             profile: OptimizationProfile::MaxDensity,
-            flags: WireFlags {
-                is_compressed: true,
-                is_chunked: true,
-                has_schema_hash: true,
-            },
+            flags: WireFlags::new(true, true, true),
             payload_len: payload3.len(),
             schema_hash: Some(0x1234),
         };
@@ -731,11 +767,7 @@ mod tests {
         // pack_frame/write_into must normalize has_schema_hash to true and preserve the schema hash
         let header1 = WireHeader {
             profile: OptimizationProfile::Realtime,
-            flags: WireFlags {
-                is_compressed: false,
-                is_chunked: false,
-                has_schema_hash: false,
-            },
+            flags: WireFlags::new(false, false, false),
             payload_len: payload.len(),
             schema_hash: Some(0x1234),
         };
@@ -749,11 +781,7 @@ mod tests {
         // pack_frame/write_into must normalize has_schema_hash to false
         let header2 = WireHeader {
             profile: OptimizationProfile::Realtime,
-            flags: WireFlags {
-                is_compressed: false,
-                is_chunked: false,
-                has_schema_hash: true,
-            },
+            flags: WireFlags::new(false, false, true),
             payload_len: payload.len(),
             schema_hash: None,
         };

@@ -149,11 +149,7 @@ mod tests {
 
         let header = WireHeader {
             profile: OptimizationProfile::Direct,
-            flags: WireFlags {
-                is_compressed: false,
-                is_chunked: false,
-                has_schema_hash: false,
-            },
+            flags: WireFlags::new(false, false, false),
             payload_len: 12,
             schema_hash: None,
         };

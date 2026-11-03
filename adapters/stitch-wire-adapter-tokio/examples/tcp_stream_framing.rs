@@ -53,11 +53,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("[Client] Connected to server at {local_addr}");
 
     let mut client_codec = StitchWireCodec::new().with_profile(OptimizationProfile::Balanced);
-    client_codec.flags = WireFlags {
-        is_compressed: true,
-        is_chunked: false,
-        has_schema_hash: false,
-    };
+    client_codec.flags = WireFlags::new(true, false, false);
 
     let mut client_framed = Framed::new(client_socket, client_codec);
 

@@ -3,6 +3,7 @@ resolver = "2"
 members = [
     "crates/stitch-wire-core",
     "crates/stitch-wire",
+    "adapters/stitch-wire-adapter-udp",
     "adapters/stitch-wire-adapter-tokio",
     "adapters/stitch-wire-adapter-std",
     "adapters/stitch-wire-adapter-c",
@@ -21,7 +22,8 @@ repository = "https://github.com/stitch-rs/stitch-wire"
 [workspace.dependencies]
 stitch-wire-core = { path = "crates/stitch-wire-core", default-features = false }
 stitch-wire = { path = "crates/stitch-wire", default-features = false }
-stitch-data = { git = "https://github.com/stitch-rs/stitch-data.git", branch = "dev", default-features = false, features = ["std", "derive"] }
+stitch-core = { path = "../stitch-framework/crates/stitch-core", default-features = false }
+stitch-data = { path = "../stitch-data/crates/stitch-data", default-features = false, features = ["std", "derive"] }
 
 zerocopy = { version = "0.8", default-features = false, features = ["derive"] }
 crc32fast = { version = "1.4", default-features = false }

@@ -1,0 +1,14 @@
+[package]
+name = "stitch-wire-adapter-udp"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "High-throughput UDP datagram batch and scatter-gather transport adapter for stitch-wire"
+keywords = ["stitch", "wire", "udp", "datagram", "networking"]
+
+[dependencies]
+stitch-wire-core = { workspace = true, default-features = false }
+stitch-wire = { workspace = true, default-features = false, features = ["std"] }

@@ -66,11 +66,7 @@ impl StitchWireCodec {
     pub fn new() -> Self {
         Self {
             profile: OptimizationProfile::Balanced,
-            flags: WireFlags {
-                is_compressed: false,
-                is_chunked: false,
-                has_schema_hash: false,
-            },
+            flags: WireFlags::new(false, false, false),
         }
     }
 

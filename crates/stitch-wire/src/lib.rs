@@ -10,6 +10,13 @@ pub use stitch_wire_core::{
     pack_frame, pack_frame_vectored, resync, resync_frame, ring, simd, unpack_frame, varint,
 };
 
+pub mod pipeline;
+pub use pipeline::{
+    BufferTerminal, CastagnoliCrcLayer, FramingLayer, GameWireChain, GameWirePipeline,
+    MtuChunkingLayer, StreamWireChain, StreamWirePipeline, SwarResyncLayer, WireBlackboard,
+    WirePresets, WireStatus,
+};
+
 #[cfg(feature = "std")]
 pub mod udp;
 
@@ -59,6 +66,10 @@ pub mod data_adapter {
                 is_compressed: profile != WireProfile::Direct,
                 is_chunked: false,
                 has_schema_hash: true,
+                retain_last: false,
+                high_priority: false,
+                requires_ack: false,
+                is_heartbeat: false,
             },
             payload_len,
             schema_hash: Some(T::SCHEMA_HASH),
@@ -103,10 +114,12 @@ pub mod prelude {
         ResyncStats, StreamResyncParser, find_magic, find_magic_swar, resync_frame,
     };
     pub use stitch_wire_core::ring::{CachePaddedAtomicUsize, SpscByteRing};
-    pub use stitch_wire_core::varint::{decode_prefix_varint, encode_prefix_varint};
 
-    #[cfg(feature = "std")]
-    pub use crate::udp::{UdpBatchReceiver, UdpBatchSender};
+    pub use crate::pipeline::{
+        BufferTerminal, CastagnoliCrcLayer, FramingLayer, GameWireChain, GameWirePipeline,
+        MtuChunkingLayer, StreamWireChain, StreamWirePipeline, SwarResyncLayer, WireBlackboard,
+        WirePresets, WireStatus,
+    };
 
     #[cfg(feature = "data")]
     pub use crate::data_adapter::{pack_record, unpack_record};
