@@ -10,11 +10,13 @@ description = "High-performance microsecond transport bus and wire protocol faca
 [dependencies]
 stitch-wire-core = { workspace = true }
 stitch-core = { workspace = true }
+stitch-macros = { workspace = true, optional = true }
 stitch-data = { workspace = true, optional = true }
 
 [features]
-default = ["std", "data"]
+default = ["std", "data", "macros"]
 std = ["stitch-wire-core/std", "stitch-core/std"]
 alloc = ["stitch-wire-core/alloc"]
 zero-copy = ["stitch-wire-core/zero-copy"]
 data = ["dep:stitch-data"]
+macros = ["dep:stitch-macros"]

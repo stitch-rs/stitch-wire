@@ -23,6 +23,7 @@ repository = "https://github.com/stitch-rs/stitch-wire"
 stitch-wire-core = { path = "crates/stitch-wire-core", default-features = false }
 stitch-wire = { path = "crates/stitch-wire", default-features = false }
 stitch-core = { git = "https://github.com/stitch-rs/stitch-framework.git", branch = "dev", default-features = false }
+stitch-macros = { git = "https://github.com/stitch-rs/stitch-framework.git", branch = "dev", default-features = false }
 stitch-data = { git = "https://github.com/stitch-rs/stitch-data.git", branch = "dev", default-features = false, features = ["std", "derive"] }
 
 zerocopy = { version = "0.8", default-features = false, features = ["derive"] }

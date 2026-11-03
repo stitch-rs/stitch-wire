@@ -2,6 +2,7 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
+pub use stitch_core as core;
 pub use stitch_wire_core;
 pub use stitch_wire_core::{
     CachePaddedAtomicUsize, FrameReader, FrameView, OptimizationProfile, ResyncStats, SpscByteRing,
@@ -16,6 +17,9 @@ pub use pipeline::{
     MtuChunkingLayer, StreamWireChain, StreamWirePipeline, SwarResyncLayer, WireBlackboard,
     WirePresets, WireStatus,
 };
+
+#[cfg(feature = "macros")]
+pub use stitch_macros::{pipeline, wire_pipeline};
 
 #[cfg(feature = "std")]
 pub mod udp;

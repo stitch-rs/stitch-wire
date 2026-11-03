@@ -376,4 +376,36 @@ mod tests {
         assert_eq!(decoded_len, payload.len());
         assert_eq!(rx_ctx.status, WireStatus::Ok);
     }
+
+    #[cfg(feature = "macros")]
+    #[crate::wire_pipeline(
+        layers = [SwarResyncLayer, FramingLayer, CastagnoliCrcLayer, MtuChunkingLayer],
+        terminal = BufferTerminal<'b>,
+        crate = crate,
+    )]
+    struct CustomGameWirePipeline<'a, 'b>;
+
+    #[cfg(feature = "macros")]
+    #[test]
+    fn test_wire_pipeline_attribute_macro() {
+        let payload = b"newtype_macro_payload";
+        let mut wire_buffer = [0u8; 128];
+        let header = WireHeader {
+            profile: OptimizationProfile::Direct,
+            flags: WireFlags::default(),
+            payload_len: payload.len(),
+            schema_hash: None,
+        };
+        let mut tx_ctx = WireBlackboard::new_tx(header, payload.len());
+        let mut pipe = CustomGameWirePipeline::new(
+            SwarResyncLayer,
+            FramingLayer,
+            CastagnoliCrcLayer,
+            MtuChunkingLayer::new(1400),
+            BufferTerminal::new(&mut wire_buffer),
+        );
+        let sent_len = pipe.run_cycle(&mut tx_ctx, payload).expect("TX cycle succeeded");
+        assert_eq!(tx_ctx.status, WireStatus::Ok);
+        assert!(sent_len > payload.len());
+    }
 }

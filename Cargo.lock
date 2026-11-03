@@ -476,7 +476,7 @@ dependencies = [
 [[package]]
 name = "stitch-core"
 version = "0.3.0"
-source = "git+https://github.com/stitch-rs/stitch-framework.git?branch=dev#dfba8f5f32bffedeb565913998704b8decac47e6"
+source = "git+https://github.com/stitch-rs/stitch-framework.git?branch=dev#1415fda9a651b78d55c24f338a6c6508583a028a"
 
 [[package]]
 name = "stitch-core"
@@ -518,11 +518,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "stitch-macros"
+version = "0.3.0"
+source = "git+https://github.com/stitch-rs/stitch-framework.git?branch=dev#1415fda9a651b78d55c24f338a6c6508583a028a"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 3.0.9",
+]
+
+[[package]]
 name = "stitch-wire"
 version = "0.1.0"
 dependencies = [
  "stitch-core 0.3.0 (git+https://github.com/stitch-rs/stitch-framework.git?branch=dev)",
  "stitch-data",
+ "stitch-macros",
  "stitch-wire-core",
 ]
 
