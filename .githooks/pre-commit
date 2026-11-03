@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Stitch-RS Ecosystem Git Pre-Commit Quality Gate
+# Automatically formats Rust files and validates with strict Clippy checks.
+
+set -e
+
+echo "==> Running pre-commit Rust checks..."
+
+# Check if cargo is available
+if ! command -v cargo &> /dev/null; then
+    echo "⚠️  Cargo not found in PATH. Skipping Rust pre-commit hooks."
+    exit 0
+fi
+
+# 1. Automatic formatting with rustfmt
+echo "    [1/2] Running cargo fmt --all..."
+cargo fmt --all
+
+# Re-stage any files that were formatted by rustfmt
+# Only stage files already tracked in git to avoid accidentally staging untracked files
+git diff --name-only --diff-filter=M | grep -E '\.rs$' | while IFS= read -r file; do
+    if [ -f "$file" ]; then
+        git add "$file"
+    fi
+done
+
+# 2. Strict Clippy check with zero warnings allowed
+echo "    [2/2] Running cargo clippy --workspace --all-targets --all-features..."
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+echo "✅ Pre-commit verification passed cleanly."
+exit 0

@@ -404,7 +404,9 @@ mod tests {
             MtuChunkingLayer::new(1400),
             BufferTerminal::new(&mut wire_buffer),
         );
-        let sent_len = pipe.run_cycle(&mut tx_ctx, payload).expect("TX cycle succeeded");
+        let sent_len = pipe
+            .run_cycle(&mut tx_ctx, payload)
+            .expect("TX cycle succeeded");
         assert_eq!(tx_ctx.status, WireStatus::Ok);
         assert!(sent_len > payload.len());
     }

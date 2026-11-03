@@ -1,0 +1,45 @@
+name: Auto-Format & Fix
+
+on:
+  pull_request:
+    branches: [ "main", "dev" ]
+    paths:
+      - "**.rs"
+      - "**/Cargo.toml"
+
+permissions:
+  contents: write
+
+jobs:
+  format-and-fix:
+    name: Rustfmt & Auto-Remediate
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - name: Checkout PR Branch
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Install Stable Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - name: Auto-format with rustfmt
+        run: cargo fmt --all
+
+      - name: Attempt Clippy automated fixes
+        run: cargo clippy --fix --allow-dirty --allow-staged --workspace --all-targets --all-features || true
+
+      - name: Re-run rustfmt after clippy fixes
+        run: cargo fmt --all
+
+      - name: Commit and Push Fixes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: auto-format Rust code and apply clippy remediations"
+          commit_user_name: "stitch-bot[bot]"
+          commit_user_email: "stitch-bot[bot]@users.noreply.github.com"
+          commit_author: "stitch-bot[bot] <stitch-bot[bot]@users.noreply.github.com>"
