@@ -1,9 +1,16 @@
 {
   "config": {
     "default": true,
-    "MD013": { "line_length": 120 }
+    "MD013": false,
+    "MD024": { "siblings_only": true },
+    "MD025": false,
+    "MD033": false,
+    "MD041": false
   },
   "ignores": [
-    "target/**"
+    "target/**",
+    "**/target/**",
+    "book/book/**",
+    "*.bk"
   ]
 }

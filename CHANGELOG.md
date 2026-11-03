@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-11-03
 
 ### Added
+
 - **SMA Composable Pipeline Engine**:
   - `WireBlackboard`: 64-byte L1D cache-aligned context satisfying `align_of == 64` and `size_of == 64`.
   - SMA Layers: `FramingLayer`, `CastagnoliCrcLayer`, `MtuChunkingLayer`, `SwarResyncLayer`.
@@ -25,5 +26,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `stitch-wire-adapter-wasm`: WebAssembly browser transport integration.
 
 ### Changed
+
 - Refactored `WireFlags` to include canonical flags (`FLAG_RETAIN_LAST`, `FLAG_HIGH_PRIORITY`, `FLAG_REQUIRES_ACK`, `FLAG_HEARTBEAT`).
 - Quarantined raw socket I/O from core crates into dedicated adapter crates.

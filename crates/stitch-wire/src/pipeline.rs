@@ -51,8 +51,6 @@ pub struct WireBlackboard {
     pub flags: WireFlags,
     /// Total bytes processed in this stroke.
     pub bytes_processed: usize,
-    /// L1D padding reserve to guarantee strictly 64-byte cache line alignment.
-    pub _padding: [u8; 11],
 }
 
 impl Blackboard for WireBlackboard {}
@@ -70,7 +68,6 @@ impl WireBlackboard {
             is_tx: true,
             flags,
             bytes_processed: 0,
-            _padding: [0u8; 11],
         }
     }
 
@@ -90,7 +87,6 @@ impl WireBlackboard {
             is_tx: false,
             flags: WireFlags::default(),
             bytes_processed: 0,
-            _padding: [0u8; 11],
         }
     }
 }
@@ -98,6 +94,7 @@ impl WireBlackboard {
 // Compile-time mechanical sympathy invariant verification
 const _: () = {
     assert!(core::mem::align_of::<WireBlackboard>() == 64);
+    assert!(core::mem::size_of::<WireBlackboard>() == 64);
 };
 
 // =========================================================================

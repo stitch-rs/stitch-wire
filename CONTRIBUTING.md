@@ -10,7 +10,7 @@ Please take a moment to review these guidelines before submitting code.
 - [Branching Strategy](#branching-strategy)
 - [Conventional Commits](#conventional-commits)
 - [Development Setup](#development-setup)
-- [Coding Standards & Core Invariants](#coding-standards--core-invariants)
+- [Coding Standards & Core Invariants](#coding-standards--core-invariants-the-sma-principles)
 - [Pull Request Workflow](#pull-request-workflow)
 
 ---

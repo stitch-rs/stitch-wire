@@ -151,6 +151,10 @@ impl<'a> SpscByteRing<'a> {
     /// Commits `count` written bytes, advancing the producer `head` pointer.
     #[inline]
     pub fn commit_write(&mut self, count: usize) {
+        assert!(
+            count <= self.available_write(),
+            "commit_write count exceeds available"
+        );
         if count == 0 {
             return;
         }

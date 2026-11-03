@@ -3,7 +3,7 @@
 //! Implements [`tokio_util::codec::Decoder`] and [`tokio_util::codec::Encoder`]
 //! for bidirectional framing of continuous byte streams.
 
-use bytes::{Buf, BufMut, BytesMut};
+use bytes::{Buf, BytesMut};
 use std::io;
 use stitch_wire_core::error::WireError;
 use stitch_wire_core::frame::{
@@ -108,15 +108,20 @@ impl Decoder for StitchWireCodec {
             return Ok(None);
         }
 
-        // 2. Attempt header parse
-        let (header, header_len) = match WireHeader::parse(src) {
-            Ok(res) => res,
-            Err(WireError::UnexpectedEof { .. }) => return Ok(None),
-            Err(WireError::InvalidMagic(_)) | Err(WireError::UnsupportedVersion(_)) => {
-                src.advance(1);
-                return self.decode(src);
+        // 2. Attempt header parse (iterative scan to avoid stack recursion)
+        let (header, header_len) = loop {
+            if src.len() < 2 {
+                return Ok(None);
             }
-            Err(e) => return Err(e.into()),
+            match WireHeader::parse(src) {
+                Ok(res) => break res,
+                Err(WireError::UnexpectedEof { .. }) => return Ok(None),
+                Err(WireError::InvalidMagic(_)) | Err(WireError::UnsupportedVersion(_)) => {
+                    src.advance(1);
+                    continue;
+                }
+                Err(e) => return Err(e.into()),
+            }
         };
 
         // 3. Check full frame size
@@ -148,11 +153,10 @@ impl Encoder<&[u8]> for StitchWireCodec {
         };
 
         let max_total_len = checked_frame_total_len(20, item.len())?;
-        dst.reserve(max_total_len);
-
-        let mut scratch = vec![0u8; max_total_len];
-        let written = pack_frame(&header, item, &mut scratch)?;
-        dst.put_slice(&scratch[..written]);
+        let cur_len = dst.len();
+        dst.resize(cur_len + max_total_len, 0);
+        let written = pack_frame(&header, item, &mut dst[cur_len..])?;
+        dst.truncate(cur_len + written);
 
         Ok(())
     }

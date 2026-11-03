@@ -4,11 +4,15 @@
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 0.2.x   | Yes                |
-| 0.1.x   | Security fixes only|
+| 0.3.x   | :white_check_mark: |
+| 0.2.x   | :white_check_mark: |
+| 0.1.x   | :white_check_mark: |
+| < 0.1   | :x:                |
 
 ## Reporting a Vulnerability
 
-Please report security vulnerabilities privately via GitHub Security Advisories or by contacting the maintainers directly.
+If you discover a security-sensitive issue or memory safety vulnerability in the Stitch ecosystem, please **do not open a public GitHub issue**.
 
-Do not disclose vulnerabilities publicly via GitHub issues or discussions until a patch has been coordinated and released. Maintainers will acknowledge receipt within 48 hours and coordinate release timelines.
+Instead, please send a report directly via GitHub Private Vulnerability Reporting or email the security team at **<security@stitch-rs.org>**.
+
+We will acknowledge receipt within 48 hours and coordinate responsible disclosure.

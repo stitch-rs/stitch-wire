@@ -67,7 +67,6 @@ pub mod data_adapter {
                 is_chunked: false,
                 has_schema_hash: true,
                 retain_last: false,
-                high_priority: false,
                 requires_ack: false,
                 is_heartbeat: false,
             },

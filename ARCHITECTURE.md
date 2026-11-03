@@ -107,6 +107,7 @@ pub struct WireBlackboard {
 ```
 
 Statically verified to satisfy:
+
 - `align_of::<WireBlackboard>() == 64`
 - `size_of::<WireBlackboard>() == 64` (exact single L1D cache-line fit).
 

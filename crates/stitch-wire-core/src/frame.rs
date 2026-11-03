@@ -80,8 +80,6 @@ pub struct WireFlags {
     pub has_schema_hash: bool,
     /// State channel marker: retain last valid state for subsequent consumers.
     pub retain_last: bool,
-    /// High-priority frame: bypasses low-priority queues in ring buffers.
-    pub high_priority: bool,
     /// Transport requires reliable delivery acknowledgment.
     pub requires_ack: bool,
     /// Frame is a system heartbeat/ping datagram.
@@ -97,7 +95,6 @@ impl WireFlags {
             is_chunked,
             has_schema_hash,
             retain_last: false,
-            high_priority: false,
             requires_ack: false,
             is_heartbeat: false,
         }
@@ -110,12 +107,10 @@ impl WireFlags {
     pub const FLAG_SCHEMA_HASH: u8 = 0x04;
     /// Bit 3: Retain last state snapshot.
     pub const FLAG_RETAIN_LAST: u8 = 0x08;
-    /// Bit 4: High priority frame.
-    pub const FLAG_HIGH_PRIORITY: u8 = 0x10;
-    /// Bit 5: Requires delivery ACK.
-    pub const FLAG_REQUIRES_ACK: u8 = 0x20;
-    /// Bit 6: Heartbeat packet.
-    pub const FLAG_HEARTBEAT: u8 = 0x40;
+    /// Bit 4: Requires delivery ACK.
+    pub const FLAG_REQUIRES_ACK: u8 = 0x10;
+    /// Bit 5: Heartbeat packet.
+    pub const FLAG_HEARTBEAT: u8 = 0x20;
 
     /// Converts flags into an 8-bit byte representation.
     #[inline]
@@ -132,9 +127,6 @@ impl WireFlags {
         }
         if self.retain_last {
             bits |= Self::FLAG_RETAIN_LAST;
-        }
-        if self.high_priority {
-            bits |= Self::FLAG_HIGH_PRIORITY;
         }
         if self.requires_ack {
             bits |= Self::FLAG_REQUIRES_ACK;
@@ -153,7 +145,6 @@ impl WireFlags {
             is_chunked: (bits & Self::FLAG_CHUNKED) != 0,
             has_schema_hash: (bits & Self::FLAG_SCHEMA_HASH) != 0,
             retain_last: (bits & Self::FLAG_RETAIN_LAST) != 0,
-            high_priority: (bits & Self::FLAG_HIGH_PRIORITY) != 0,
             requires_ack: (bits & Self::FLAG_REQUIRES_ACK) != 0,
             is_heartbeat: (bits & Self::FLAG_HEARTBEAT) != 0,
         }
@@ -195,7 +186,7 @@ impl WireHeader {
         buf[1] = WIRE_VERSION_1;
 
         let profile_bits = (self.profile as u8) & 0b11;
-        let flags_bits = (flags.to_bits() & 0b1111) << 2;
+        let flags_bits = (flags.to_bits() & 0b0011_1111) << 2;
         buf[2] = profile_bits | flags_bits;
 
         let mut offset = 3;
@@ -227,17 +218,9 @@ impl WireHeader {
         }
 
         let byte2 = buf[2];
-        // Enforce reserved bits 6..7 are strictly zero
-        if (byte2 & 0b1100_0000) != 0 {
-            return Err(WireError::InvalidHeaderFlags(byte2));
-        }
 
         let profile = OptimizationProfile::from_bits(byte2 & 0b11);
-        let flag_bits = (byte2 >> 2) & 0b1111;
-        // Verify reserved flag bit 3 (bit 5 of byte 2) is zero
-        if (flag_bits & 0b1000) != 0 {
-            return Err(WireError::InvalidHeaderFlags(byte2));
-        }
+        let flag_bits = (byte2 >> 2) & 0b0011_1111;
         let flags = WireFlags::from_bits(flag_bits);
 
         let mut offset = 3;
@@ -740,24 +723,19 @@ mod tests {
     }
 
     #[test]
-    fn test_frame_header_reserved_bits_rejected() {
+    fn test_frame_header_flags_parsing() {
         let mut buf = [0u8; 32];
         buf[0] = WIRE_MAGIC;
         buf[1] = WIRE_VERSION_1;
-        // Set reserved bit 6 in byte2 (0b0100_0000)
-        buf[2] = 0b0100_0000;
-        let res = WireHeader::parse(&buf);
-        assert_eq!(res, Err(WireError::InvalidHeaderFlags(0b0100_0000)));
-
-        // Set reserved bit 7 in byte2 (0b1000_0000)
-        buf[2] = 0b1000_0000;
-        let res2 = WireHeader::parse(&buf);
-        assert_eq!(res2, Err(WireError::InvalidHeaderFlags(0b1000_0000)));
-
-        // Set reserved flag bit 3 (bit 5 in byte2, 0b0010_0000)
-        buf[2] = 0b0010_0000;
-        let res3 = WireHeader::parse(&buf);
-        assert_eq!(res3, Err(WireError::InvalidHeaderFlags(0b0010_0000)));
+        // Profile Realtime (1) + RetainLast (bit 3 -> 0x08 << 2 = 0x20)
+        buf[2] = 1 | (0x08 << 2);
+        // Prefix varint 0 (1-byte varint representation where LSB is 1)
+        buf[3] = 1;
+        let (hdr, len) = WireHeader::parse(&buf).unwrap();
+        assert_eq!(len, 4);
+        assert_eq!(hdr.profile, OptimizationProfile::Realtime);
+        assert!(hdr.flags.retain_last);
+        assert!(!hdr.flags.is_compressed);
     }
 
     #[test]
@@ -810,5 +788,47 @@ mod tests {
         assert_eq!(payload.len(), 0);
         assert!(!unpacked.flags.has_schema_hash);
         assert_eq!(unpacked.schema_hash, None);
+    }
+
+    #[test]
+    fn test_all_wire_flags_roundtrip() {
+        for compressed in [false, true] {
+            for chunked in [false, true] {
+                for schema in [false, true] {
+                    for retain in [false, true] {
+                        for ack in [false, true] {
+                            for heartbeat in [false, true] {
+                                let flags = WireFlags {
+                                    is_compressed: compressed,
+                                    is_chunked: chunked,
+                                    has_schema_hash: schema,
+                                    retain_last: retain,
+                                    requires_ack: ack,
+                                    is_heartbeat: heartbeat,
+                                };
+                                let header = WireHeader {
+                                    profile: OptimizationProfile::Realtime,
+                                    flags,
+                                    payload_len: 4,
+                                    schema_hash: if schema { Some(0xCAFE_BABE) } else { None },
+                                };
+                                let mut buf = [0u8; 64];
+                                let written = header.write_into(&mut buf).unwrap();
+                                let (parsed, consumed) =
+                                    WireHeader::parse(&buf[..written]).unwrap();
+                                assert_eq!(consumed, written);
+                                assert_eq!(parsed.profile, header.profile);
+                                assert_eq!(parsed.flags.is_compressed, flags.is_compressed);
+                                assert_eq!(parsed.flags.is_chunked, flags.is_chunked);
+                                assert_eq!(parsed.flags.has_schema_hash, flags.has_schema_hash);
+                                assert_eq!(parsed.flags.retain_last, flags.retain_last);
+                                assert_eq!(parsed.flags.requires_ack, flags.requires_ack);
+                                assert_eq!(parsed.flags.is_heartbeat, flags.is_heartbeat);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

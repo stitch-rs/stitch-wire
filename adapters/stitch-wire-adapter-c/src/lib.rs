@@ -136,7 +136,11 @@ pub unsafe extern "C" fn stitch_unpack_frame(
             Ok((header, payload)) => {
                 // SAFETY: Pointers checked non-null above.
                 unsafe {
-                    *out_payload_ptr = payload.as_ptr();
+                    *out_payload_ptr = if payload.is_empty() {
+                        core::ptr::null()
+                    } else {
+                        payload.as_ptr()
+                    };
                     *out_payload_len = payload.len();
                     if !out_schema_hash.is_null() {
                         *out_schema_hash = header.schema_hash.unwrap_or(0);
