@@ -119,6 +119,10 @@ impl<'a> SpscByteRing<'a> {
     /// Commits `count` consumed bytes, advancing the consumer `tail` pointer.
     #[inline]
     pub fn commit_read(&self, count: usize) {
+        assert!(
+            count <= self.available_read(),
+            "commit_read count exceeds available"
+        );
         if count == 0 {
             return;
         }

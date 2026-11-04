@@ -72,8 +72,8 @@ pub unsafe extern "C" fn stitch_pack_frame(
                 None,
             )
         } else {
-            // SAFETY: Non-null pointer from caller.
-            let opt = unsafe { &*opts };
+            // SAFETY: opts pointer checked non-null above. Read unaligned to avoid UB from misaligned C structs.
+            let opt = unsafe { core::ptr::read_unaligned(opts) };
             let p = match opt.profile {
                 0 => OptimizationProfile::Direct,
                 1 => OptimizationProfile::Realtime,
@@ -134,16 +134,22 @@ pub unsafe extern "C" fn stitch_unpack_frame(
 
         match unpack_frame(buf) {
             Ok((header, payload)) => {
-                // SAFETY: Pointers checked non-null above.
+                // SAFETY: Pointers checked non-null above. Using write_unaligned for safe C FFI interop.
                 unsafe {
-                    *out_payload_ptr = if payload.is_empty() {
-                        core::ptr::null()
-                    } else {
-                        payload.as_ptr()
-                    };
-                    *out_payload_len = payload.len();
+                    core::ptr::write_unaligned(
+                        out_payload_ptr,
+                        if payload.is_empty() {
+                            core::ptr::null()
+                        } else {
+                            payload.as_ptr()
+                        },
+                    );
+                    core::ptr::write_unaligned(out_payload_len, payload.len());
                     if !out_schema_hash.is_null() {
-                        *out_schema_hash = header.schema_hash.unwrap_or(0);
+                        core::ptr::write_unaligned(
+                            out_schema_hash,
+                            header.schema_hash.unwrap_or(0),
+                        );
                     }
                 }
                 1
