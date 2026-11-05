@@ -12,11 +12,13 @@ stitch-wire-core = { workspace = true }
 stitch-core = { workspace = true }
 stitch-macros = { workspace = true, optional = true }
 stitch-data = { workspace = true, optional = true }
+wire-ring = { workspace = true, optional = true }
 
 [features]
-default = ["std", "data", "macros"]
+default = ["std", "data", "macros", "ring"]
 std = ["stitch-wire-core/std", "stitch-core/std"]
 alloc = ["stitch-wire-core/alloc"]
 zero-copy = ["stitch-wire-core/zero-copy"]
 data = ["dep:stitch-data"]
 macros = ["dep:stitch-macros"]
+ring = ["dep:wire-ring", "wire-ring/std"]

@@ -24,6 +24,11 @@ pub use stitch_macros::{pipeline, wire_pipeline};
 #[cfg(feature = "std")]
 pub mod udp;
 
+#[cfg(feature = "ring")]
+pub mod ring_channel;
+#[cfg(feature = "ring")]
+pub use ring_channel::{WireRingSink, WireRingStream, wire_ring_channel, wire_ring_heap_channel};
+
 #[cfg(feature = "data")]
 pub mod data_adapter {
     use crate::{
@@ -126,4 +131,9 @@ pub mod prelude {
 
     #[cfg(feature = "data")]
     pub use crate::data_adapter::{pack_record, unpack_record};
+
+    #[cfg(feature = "ring")]
+    pub use crate::ring_channel::{
+        WireRingSink, WireRingStream, wire_ring_channel, wire_ring_heap_channel,
+    };
 }

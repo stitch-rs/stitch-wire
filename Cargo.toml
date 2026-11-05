@@ -25,6 +25,7 @@ stitch-wire = { path = "crates/stitch-wire", default-features = false }
 stitch-core = { git = "https://github.com/stitch-rs/stitch-framework.git", branch = "dev", default-features = false }
 stitch-macros = { git = "https://github.com/stitch-rs/stitch-framework.git", branch = "dev", default-features = false }
 stitch-data = { git = "https://github.com/stitch-rs/stitch-data.git", branch = "dev", default-features = false, features = ["std", "derive"] }
+wire-ring = { git = "https://github.com/ulquiorracode/wire-ring-rs.git", branch = "dev", default-features = false }
 
 zerocopy = { version = "0.8", default-features = false, features = ["derive"] }
 crc32fast = { version = "1.4", default-features = false }
