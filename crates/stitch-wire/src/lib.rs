@@ -5,10 +5,11 @@
 pub use stitch_core as core;
 pub use stitch_wire_core;
 pub use stitch_wire_core::{
-    CachePaddedAtomicUsize, FrameReader, FrameView, OptimizationProfile, ResyncStats, SpscByteRing,
-    StreamResyncParser, VectoredFrame, WIRE_MAGIC, WIRE_VERSION_1, WireError, WireFlags,
-    WireHeader, checked_frame_total_len, crc, error, find_magic, find_magic_swar, frame,
-    pack_frame, pack_frame_vectored, resync, resync_frame, ring, simd, unpack_frame, varint,
+    CachePaddedAtomicUsize, ChunkPartitioner, FrameReader, FrameView, OptimizationProfile,
+    ResyncStats, SpscByteRing, StreamResyncParser, TransferChunkDesc, TransferSessionHeader,
+    VectoredFrame, WIRE_MAGIC, WIRE_VERSION_1, WireError, WireFlags, WireHeader,
+    checked_frame_total_len, crc, error, find_magic, find_magic_swar, frame, pack_frame,
+    pack_frame_vectored, resync, resync_frame, ring, simd, transfer, unpack_frame, varint,
 };
 
 pub mod pipeline;
@@ -22,12 +23,16 @@ pub use pipeline::{
 pub use stitch_macros::{pipeline, wire_pipeline};
 
 #[cfg(feature = "std")]
+pub mod transfer_sink;
+#[cfg(feature = "std")]
 pub mod udp;
 
 #[cfg(feature = "ring")]
 pub mod ring_channel;
 #[cfg(feature = "ring")]
 pub use ring_channel::{WireRingSink, WireRingStream, wire_ring_channel, wire_ring_heap_channel};
+#[cfg(feature = "std")]
+pub use transfer_sink::MemoryTransferSink;
 
 #[cfg(feature = "data")]
 pub mod data_adapter {

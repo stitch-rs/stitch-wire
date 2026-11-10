@@ -11,6 +11,7 @@ pub mod frame;
 pub mod resync;
 pub mod ring;
 pub mod simd;
+pub mod transfer;
 pub mod varint;
 
 pub use crc::{
@@ -24,4 +25,5 @@ pub use frame::{
 };
 pub use resync::{ResyncStats, StreamResyncParser, find_magic, find_magic_swar, resync_frame};
 pub use ring::{CachePaddedAtomicUsize, SpscByteRing};
+pub use transfer::{ChunkPartitioner, TransferChunkDesc, TransferSessionHeader};
 pub use varint::{decode_prefix_varint, encode_prefix_varint};
